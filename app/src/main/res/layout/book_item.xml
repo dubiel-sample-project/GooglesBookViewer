@@ -16,7 +16,7 @@
         android:layout_height="wrap_content">
 
         <ImageView
-            android:layout_width=""
+            android:layout_width="@dimen/small_thumbnail_width"
             android:layout_height="@dimen/small_thumbnail_height"
             android:id="@+id/book_item_small_thumbnail"
             android:layout_alignParentLeft="true"

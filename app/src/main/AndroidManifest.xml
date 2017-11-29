@@ -21,6 +21,15 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
+        <activity
+            android:name=".BookDetailActivity"
+            android:label="@string/title_activity_book_detail"
+            android:parentActivityName="android.support.v7.app.AppCompatActivity"
+            android:theme="@style/AppTheme.NoActionBar">
+            <meta-data
+                android:name="android.support.PARENT_ACTIVITY"
+                android:value="android.support.v7.app.AppCompatActivity" />
+        </activity>
     </application>
 
 </manifest>

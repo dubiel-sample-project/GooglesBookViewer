@@ -2,6 +2,8 @@ package com.dubiel.sample.googlesbookviewer;
 
 
 import android.content.Context;
+import android.content.Intent;
+import android.os.Bundle;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -14,6 +16,9 @@ import com.dubiel.sample.googlesbookviewer.search.searchitem.BookListItem;
 import com.squareup.picasso.Picasso;
 
 public class BookItemListAdapter extends RecyclerView.Adapter<BookItemListAdapter.ViewHolder> {
+    private static int SMALL_THUMBNAIL_WIDTH = 128;
+    private static int SMALL_THUMBNAIL_HEIGHT = 192;
+
     private Context context;
     private BookListItem[] bookListItems;
 
@@ -34,10 +39,23 @@ public class BookItemListAdapter extends RecyclerView.Adapter<BookItemListAdapte
     }
 
     @Override
-    public void onBindViewHolder(BookItemListAdapter.ViewHolder viewHolder, int i) {
+    public void onBindViewHolder(final BookItemListAdapter.ViewHolder viewHolder, int i) {
+        viewHolder.selfLink = bookListItems[i].getSelfLink();
         Picasso.with(context).load(bookListItems[i].getVolumeInfo().getImageLinks().getSmallThumbnail())
-                .resize(R.integer.small_thumbnail_width, R.integer.small_thumbnail_height).into(viewHolder.smallThumbnail);
+                .resize(SMALL_THUMBNAIL_WIDTH, SMALL_THUMBNAIL_HEIGHT)
+                .into(viewHolder.smallThumbnail);
         viewHolder.title.setText(bookListItems[i].getVolumeInfo().getTitle());
+
+        viewHolder.view.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Context context = v.getContext();
+                Intent intent = new Intent(context, BookDetailActivity.class);
+                intent.putExtra(BookDetailActivityFragment.ARG_SELF_LINK, viewHolder.selfLink);
+
+                context.startActivity(intent);
+            }
+        });
     }
 
     @Override
@@ -52,8 +70,15 @@ public class BookItemListAdapter extends RecyclerView.Adapter<BookItemListAdapte
     public class ViewHolder extends RecyclerView.ViewHolder{
         private ImageView smallThumbnail;
         private TextView title;
+
+        public final View view;
+        public String selfLink;
+
         public ViewHolder(View view) {
             super(view);
+
+            this.view = view;
+
             title = (TextView)view.findViewById(R.id.book_item_title);
             smallThumbnail = (ImageView) view.findViewById(R.id.book_item_small_thumbnail);
         }
