@@ -61,7 +61,7 @@ public class SearchManager {
 
     private Context context;
     private ListeningExecutorService mExecutorService;
-    private List<ListenableFuture<List<BookListItem>>> listenableFutures;
+//    private List<ListenableFuture<List<BookListItem>>> listenableFutures;
     private STATUS mCurrentStatus = STATUS.FINISHED;
 
     static {
@@ -74,7 +74,7 @@ public class SearchManager {
 
     private SearchManager() {
         mExecutorService = MoreExecutors.listeningDecorator(Executors.newFixedThreadPool(NUM_THREADS));
-        listenableFutures = new ArrayList<>();
+//        listenableFutures = new ArrayList<>();
     }
 
     public Context getContext() {

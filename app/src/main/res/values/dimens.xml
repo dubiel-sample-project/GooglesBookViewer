@@ -7,4 +7,6 @@
     <dimen name="fab_margin">16dp</dimen>
     <dimen name="small_thumbnail_width">128dp</dimen>
     <dimen name="small_thumbnail_height">192dp</dimen>
-</resources>
+    <dimen name="small_width">192dp</dimen>
+    <dimen name="small_height">288dp</dimen>
+    </resources>

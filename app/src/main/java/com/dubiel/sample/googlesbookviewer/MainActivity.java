@@ -20,7 +20,12 @@ import android.view.MenuItem;
 
 import com.dubiel.sample.googlesbookviewer.search.*;
 import com.dubiel.sample.googlesbookviewer.search.searchitem.*;
+import com.google.common.cache.CacheBuilder;
+import com.google.common.cache.CacheLoader;
+import com.google.common.cache.LoadingCache;
 import com.google.common.util.concurrent.FutureCallback;
+import com.google.gson.reflect.TypeToken;
+import com.koushikdutta.ion.Ion;
 
 import java.lang.ref.WeakReference;
 import java.util.ArrayList;
@@ -38,6 +43,8 @@ public class MainActivity extends AppCompatActivity
     private final MessageHandler messageHandler = new MessageHandler(this);
 
     private ConcurrentHashMap<String, BookListItem> bookListItems;
+    private LoadingCache<Integer, BookListItems> bookListItemsCache;
+
     private SearchManager mSearchManager;
     private BookItemListAdapter bookItemListAdapter;
 
@@ -145,10 +152,27 @@ public class MainActivity extends AppCompatActivity
 
         bookListItems = new ConcurrentHashMap<>();
 
-        mSearchManager = SearchManager.getInstance();
-        mSearchManager.setContext(this);
+        bookListItemsCache = CacheBuilder.newBuilder()
+                .maximumSize(1000)
+                .build(
+                        new CacheLoader<Integer, BookListItems>() {
+                            public BookListItems load(Integer key) throws Exception {
+                                int startIndex = key * 40;
+                                String url = "https://www.googleapis.com/books/v1/volumes?q=car&fields=items(id,selfLink,volumeInfo/title,volumeInfo/imageLinks/smallThumbnail)&startIndex="+startIndex+"&maxResults=40";
+//                                SearchTask searchTask = new SearchTask(getApplicationContext(), url);
+//                                return getBookListItems(integer);
+                                return Ion.with(getApplicationContext())
+                                        .load(url)
+                                        .as(new TypeToken<BookListItems>() {
+                                        }).get();
+                            }
+                        });
 
-        doSearch();
+//        mSearchManager = SearchManager.getInstance();
+//        mSearchManager.setContext(this);
+//
+//        doSearch();
+        preloadCache();
     }
 
     @Override
@@ -210,7 +234,6 @@ public class MainActivity extends AppCompatActivity
 
     public void onResultsReady() {
         System.out.println("MainActivity.onResultsReady, bookListItems.size: " + bookListItems.size());
-
         bookItemListAdapter.setBookListItems(bookListItems.values().toArray(new BookListItem[0]));
         bookItemListAdapter.notifyDataSetChanged();
     }
@@ -225,5 +248,15 @@ public class MainActivity extends AppCompatActivity
 
         BookItemListCallback callback = new BookItemListCallback(tasks.size());
         SearchManager.getInstance().startSearch(tasks, callback, messageHandler);
+    }
+
+    private void preloadCache() {
+        for(int i = 0; i < 5; i++) {
+            try {
+                bookListItemsCache.get(i);
+            } catch(Exception e) {
+                System.out.println(e.getMessage());
+            }
+        }
     }
 }

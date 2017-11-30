@@ -15,4 +15,16 @@ public class BookDetailItem {
         this.selfLink = selfLink;
         this.volumeInfo = volumeInfo;
     }
+
+    public String getId() {
+        return id;
+    }
+
+    public String getSelfLink() {
+        return selfLink;
+    }
+
+    public VolumeInfo getVolumeInfo() {
+        return volumeInfo;
+    }
 }

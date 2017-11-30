@@ -1,11 +1,41 @@
-<?xml version="1.0" encoding="utf-8"?>
-<android.support.constraint.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:app="http://schemas.android.com/apk/res-auto"
-    xmlns:tools="http://schemas.android.com/tools"
+<RelativeLayout android:layout_marginLeft="20dp"
+    android:layout_marginTop="20dp"
+    android:layout_marginBottom="20dp"
     android:layout_width="match_parent"
-    android:layout_height="match_parent"
-    tools:context="com.dubiel.sample.googlesbookviewer.BookDetailActivityFragment"
-    tools:showIn="@layout/activity_book_detail">
+    android:layout_height="wrap_content"
+    xmlns:android="http://schemas.android.com/apk/res/android">
 
+    <ImageView
+        android:layout_width="@dimen/small_thumbnail_width"
+        android:layout_height="@dimen/small_thumbnail_height"
+        android:id="@+id/book_detail_item_small"
+        android:layout_alignParentLeft="true"
+        android:layout_alignParentTop="true"
+        android:layout_marginRight="20dp"/>
 
-</android.support.constraint.ConstraintLayout>
+    <TextView
+        android:id="@+id/book_detail_item_title"
+        android:layout_marginTop="10dp"
+        android:layout_marginBottom="10dp"
+        android:layout_gravity="center"
+        android:textSize="18sp"
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+        android:textStyle="bold"
+        android:layout_centerVertical="true"
+        android:layout_below="@+id/book_detail_item_small" />
+
+    <TextView
+        android:id="@+id/book_detail_item_author"
+        android:layout_marginTop="10dp"
+        android:layout_marginBottom="10dp"
+        android:layout_gravity="center"
+        android:textSize="14sp"
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+        android:textStyle="bold"
+        android:layout_centerVertical="true"
+        android:layout_below="@+id/book_detail_item_title" />
+
+</RelativeLayout>
+
