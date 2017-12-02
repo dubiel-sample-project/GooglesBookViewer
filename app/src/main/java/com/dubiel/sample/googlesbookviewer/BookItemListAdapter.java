@@ -5,6 +5,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
 import android.support.v7.widget.RecyclerView;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -21,16 +22,20 @@ import com.squareup.picasso.Picasso;
 import java.util.concurrent.ExecutionException;
 
 public class BookItemListAdapter extends RecyclerView.Adapter<BookItemListAdapter.ViewHolder> {
-    private static int SMALL_THUMBNAIL_WIDTH = 128;
-    private static int SMALL_THUMBNAIL_HEIGHT = 192;
+
+    static final private String TAG = "BookItemListAdapter";
 
     private Context context;
 //    private BookListItem[] bookListItems;
     private LoadingCache<Integer, BookListItems> bookListItems;
+    private int smallThumbnailWidth, smallThumbnailHeight;
 
     public BookItemListAdapter(Context context, LoadingCache<Integer, BookListItems> bookListItems) {
         this.context = context;
         this.bookListItems = bookListItems;
+
+        smallThumbnailWidth = context.getResources().getInteger(R.integer.small_thumbnail_width);
+        smallThumbnailHeight = context.getResources().getInteger(R.integer.small_thumbnail_height);
     }
 
 //    public BookItemListAdapter(Context context, BookListItem[] bookListItems) {
@@ -54,15 +59,22 @@ public class BookItemListAdapter extends RecyclerView.Adapter<BookItemListAdapte
         try {
             BookListItems currentBookListItems = bookListItems.get(key);
 
-            int bookListItemIndex = key + (i % SearchManager.MAX_RESULTS);
+            int bookListItemIndex = i % SearchManager.MAX_RESULTS;
             System.out.println("bookListItemIndex: " + bookListItemIndex);
 
             BookListItem currentBookListItem = currentBookListItems.getItems()[bookListItemIndex];
 
+//            System.out.println("small thumbnail width: " + smallThumbnailWidth);
+//            System.out.println("small thumbnail height: " + smallThumbnailHeight);
+
             viewHolder.selfLink = currentBookListItem.getSelfLink();
-            Picasso.with(context).load(currentBookListItem.getVolumeInfo().getImageLinks().getSmallThumbnail())
-                    .resize(SMALL_THUMBNAIL_WIDTH, SMALL_THUMBNAIL_HEIGHT)
-                    .into(viewHolder.smallThumbnail);
+            try {
+                Picasso.with(context).load(currentBookListItem.getVolumeInfo().getImageLinks().getSmallThumbnail())
+                        .resize(smallThumbnailWidth, smallThumbnailHeight)
+                        .into(viewHolder.smallThumbnail);
+            } catch(NullPointerException e) {
+                Log.i(BookItemListAdapter.TAG, "small thumbnail image of " + currentBookListItem.getSelfLink() + " not present");
+            }
             viewHolder.title.setText(currentBookListItem.getVolumeInfo().getTitle());
 
             viewHolder.view.setOnClickListener(new View.OnClickListener() {

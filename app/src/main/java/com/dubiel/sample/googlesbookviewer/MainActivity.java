@@ -1,15 +1,12 @@
 package com.dubiel.sample.googlesbookviewer;
 
+import android.content.Context;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
-import android.support.design.widget.FloatingActionButton;
-import android.support.design.widget.Snackbar;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
-import android.util.Log;
 import android.view.View;
-import android.support.design.widget.NavigationView;
 import android.support.v4.view.GravityCompat;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBarDrawerToggle;
@@ -17,6 +14,7 @@ import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.widget.SearchView;
 
 import com.dubiel.sample.googlesbookviewer.search.*;
 import com.dubiel.sample.googlesbookviewer.search.searchitem.*;
@@ -34,7 +32,7 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.CountDownLatch;
 
 public class MainActivity extends AppCompatActivity
-        implements NavigationView.OnNavigationItemSelectedListener,
+        implements DrawerListAdapter.OnDrawerItemClickListener,
         OnPartialResultsReadyListener,
         OnResultsReadyListener {
 
@@ -42,11 +40,13 @@ public class MainActivity extends AppCompatActivity
 
     private final MessageHandler messageHandler = new MessageHandler(this);
 
-    private ConcurrentHashMap<String, BookListItem> bookListItems;
+//    private ConcurrentHashMap<String, BookListItem> bookListItems;
     private LoadingCache<Integer, BookListItems> bookListItemsCache;
 
-    private SearchManager mSearchManager;
+    private SearchManager searchManager;
     private BookItemListAdapter bookItemListAdapter;
+    private RecyclerView drawerList;
+    private String currentSearchTerm;
 
     private static class MessageHandler extends Handler {
         private final WeakReference<MainActivity> mainActivityWeakReference;
@@ -109,16 +109,16 @@ public class MainActivity extends AppCompatActivity
 //                }
 //            }
 
-            Log.i(TAG, "thread id done: " + Long.toString(Thread.currentThread().getId()));
-            Log.i(TAG, "thread name done: " + Thread.currentThread().getName());
-            Log.i(TAG, "latch count: " + latch.getCount());
+//            Log.i(TAG, "thread id done: " + Long.toString(Thread.currentThread().getId()));
+//            Log.i(TAG, "thread name done: " + Thread.currentThread().getName());
+//            Log.i(TAG, "latch count: " + latch.getCount());
 
             latch.countDown();
 
             Bundle data = new Bundle();
             data.putInt("current", (int) latch.getCount());
             data.putInt("max", max);
-//            data.putInt("totalresults", len);
+            data.putInt("totalresults", result.getItems().length);
 
             Message msg = messageHandler.obtainMessage(SearchManager.TASK_COMPLETE);
             msg.setData(data);
@@ -133,18 +133,44 @@ public class MainActivity extends AppCompatActivity
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+
         setContentView(R.layout.activity_main);
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
 
         DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
+        drawerList = (RecyclerView) findViewById(R.id.left_drawer);
+
+        LinearLayoutManager linearLayoutManager = new LinearLayoutManager(this);
+        drawerList.setLayoutManager(linearLayoutManager);
+
+//        mDrawerLayout.setDrawerShadow(R.mipmap.drawer_shadow, GravityCompat.START);
+        drawerList.setHasFixedSize(true);
+
+        String[] popularSearchTerms = getResources().getStringArray(R.array.category_array);
+        currentSearchTerm = popularSearchTerms[0];
+
+        drawerList.setAdapter(new DrawerListAdapter(popularSearchTerms, this));
+        getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+        getSupportActionBar().setHomeButtonEnabled(true);
+
         ActionBarDrawerToggle toggle = new ActionBarDrawerToggle(
-                this, drawer, toolbar, R.string.navigation_drawer_open, R.string.navigation_drawer_close);
+                this, drawer, toolbar, R.string.navigation_drawer_open, R.string.navigation_drawer_close) {
+            public void onDrawerClosed(View view) {
+                getSupportActionBar().setTitle(R.string.app_name);
+                invalidateOptionsMenu();
+            }
+
+            public void onDrawerOpened(View drawerView) {
+                getSupportActionBar().setTitle(R.string.popular_searches);
+                invalidateOptionsMenu();
+            }
+        };
         drawer.setDrawerListener(toggle);
         toggle.syncState();
 
-        NavigationView navigationView = (NavigationView) findViewById(R.id.nav_view);
-        navigationView.setNavigationItemSelectedListener(this);
+//        NavigationView navigationView = (NavigationView) findViewById(R.id.nav_view);
+//        navigationView.setNavigationItemSelectedListener(this);
 
         RecyclerView recyclerView = (RecyclerView)findViewById(R.id.book_item_list_recycler_view);
         recyclerView.setHasFixedSize(true);
@@ -159,7 +185,8 @@ public class MainActivity extends AppCompatActivity
                         new CacheLoader<Integer, BookListItems>() {
                             public BookListItems load(Integer key) throws Exception {
                                 int startIndex = key * SearchManager.MAX_RESULTS;
-                                String url = "https://www.googleapis.com/books/v1/volumes?q=car&fields=items(id,selfLink,volumeInfo/title,volumeInfo/imageLinks/smallThumbnail)&startIndex="+startIndex+"&maxResults=" + SearchManager.MAX_RESULTS;
+                                String url = String.format(SearchManager.SEARCH_URL, currentSearchTerm, startIndex);
+//                                "https://www.googleapis.com/books/v1/volumes?q=car&fields=items(id,selfLink,volumeInfo/title,volumeInfo/imageLinks/smallThumbnail)&startIndex="+startIndex+"&maxResults=" + SearchManager.MAX_RESULTS;
 //                                SearchTask searchTask = new SearchTask(getApplicationContext(), url);
 //                                return getBookListItems(integer);
                                 BookListItems result = Ion.with(getApplicationContext())
@@ -172,13 +199,13 @@ public class MainActivity extends AppCompatActivity
                             }
                         });
 
-        mSearchManager = SearchManager.getInstance();
-        mSearchManager.setContext(this);
+        searchManager = SearchManager.getInstance();
+        searchManager.setContext(this);
 
         bookItemListAdapter = new BookItemListAdapter(getApplicationContext(), bookListItemsCache);
         recyclerView.setAdapter(bookItemListAdapter);
 
-        preloadCache();
+        search();
     }
 
     @Override
@@ -193,8 +220,28 @@ public class MainActivity extends AppCompatActivity
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
-        // Inflate the menu; this adds items to the action bar if it is present.
         getMenuInflater().inflate(R.menu.main, menu);
+
+        android.app.SearchManager searchManager = (android.app.SearchManager) getSystemService(Context.SEARCH_SERVICE);
+        SearchView searchView = (SearchView) menu.findItem(R.id.search).getActionView();
+        searchView.setSearchableInfo(searchManager.getSearchableInfo(getComponentName()));
+        searchView.setIconifiedByDefault(false);
+
+        searchView.setOnQueryTextListener(new SearchView.OnQueryTextListener() {
+            @Override
+            public boolean onQueryTextSubmit(String query) {
+                System.out.println("onQueryTextSubmit: " + query);
+                currentSearchTerm = query;
+                search();
+                return true;
+            }
+
+            @Override
+            public boolean onQueryTextChange(String newText) {
+                return false;
+            }
+        });
+
         return true;
     }
 
@@ -213,52 +260,51 @@ public class MainActivity extends AppCompatActivity
         return super.onOptionsItemSelected(item);
     }
 
-    @SuppressWarnings("StatementWithEmptyBody")
+//    @SuppressWarnings("StatementWithEmptyBody")
+//    @Override
+//    public boolean onNavigationItemSelected(MenuItem item) {
+//        // Handle navigation view item clicks here.
+//        int id = item.getItemId();
+//
+//        System.out.println("onNavigationItemSelected: " + id);
+//
+//        DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
+//        drawer.closeDrawer(GravityCompat.START);
+//        return true;
+//    }
+
     @Override
-    public boolean onNavigationItemSelected(MenuItem item) {
-        // Handle navigation view item clicks here.
-        int id = item.getItemId();
+    public void onDrawerItemClick(View view, int position) {
+        setTitle(getResources().getStringArray(R.array.category_array)[position]);
 
-        if (id == R.id.nav_camera) {
-            // Handle the camera action
-        } else if (id == R.id.nav_gallery) {
+        String categoryString = getResources().getStringArray(R.array.category_array)[position];
+        System.out.println("onDrawerItemClick: " + categoryString);
 
-        } else if (id == R.id.nav_slideshow) {
-
-        } else if (id == R.id.nav_manage) {
-
-        } else if (id == R.id.nav_share) {
-
-        } else if (id == R.id.nav_send) {
-
-        }
+        currentSearchTerm = categoryString;
+        search();
 
         DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
         drawer.closeDrawer(GravityCompat.START);
-        return true;
     }
 
     public void onResultsReady() {
         System.out.println("MainActivity.onResultsReady");
 //        bookItemListAdapter.setBookListItems(bookListItemsCache);
         bookItemListAdapter.notifyDataSetChanged();
+        ((RecyclerView)findViewById(R.id.book_item_list_recycler_view)).scrollToPosition(0);
     }
 
     public void onPartialResultsReady(int current, int max, int totalResults) {
         System.out.println("MainActivity.onPartialResultsReady, totalResults: " + totalResults);
     }
 
-    private void preloadCache() {
-//        for(int i = 0; i < 5; i++) {
-//            try {
-//                bookListItemsCache.get(i);
-//            } catch(Exception e) {
-//                System.out.println(e.getMessage());
-//            }
-//        }
+    private void search() {
+        bookListItemsCache.invalidateAll();
 
         List<SearchTask> tasks = new ArrayList<>();
-        tasks.add(SearchManager.getInstance().getSearchTask(0));
+        for(int i = 0; i < 5; i++) {
+            tasks.add(SearchManager.getInstance().getSearchTask(currentSearchTerm, i));
+        }
 
         BookItemListCallback callback = new BookItemListCallback(tasks.size());
         SearchManager.getInstance().startSearch(tasks, callback, messageHandler);

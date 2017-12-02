@@ -7,6 +7,14 @@ public class VolumeInfo {
     public ImageLinks imageLinks;
     public String[] authors;
     public String description;
+    public String infoLink;
+
+    public VolumeInfo() {
+    }
+
+    public VolumeInfo(String title) {
+        this.title = title;
+    }
 
     public VolumeInfo(String title, ImageLinks imageLinks) {
         this.title = title;
@@ -26,6 +34,14 @@ public class VolumeInfo {
         this.description = description;
     }
 
+    public VolumeInfo(String title, ImageLinks imageLinks, String[] authors, String description, String infoLink) {
+        this.title = title;
+        this.imageLinks = imageLinks;
+        this.authors = authors;
+        this.description = description;
+        this.infoLink = infoLink;
+    }
+
     public String getTitle() {
         return title;
     }
@@ -40,5 +56,9 @@ public class VolumeInfo {
 
     public String getDescription() {
         return description;
+    }
+
+    public String getInfoLink() {
+        return infoLink;
     }
 }

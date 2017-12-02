@@ -24,6 +24,8 @@ public class SearchManager {
     static final public int ALL_TASK_COMPLETE = 2;
 
     static final public int MAX_RESULTS = 40;
+    static final public String SEARCH_URL =
+            "https://www.googleapis.com/books/v1/volumes?q=%s&fields=items(id,selfLink,volumeInfo/title,volumeInfo/imageLinks/smallThumbnail)&startIndex=%d&maxResults=" + SearchManager.MAX_RESULTS;
 
 //    public enum CATEGORY {
 //        ASSAULT,
@@ -135,9 +137,10 @@ public class SearchManager {
         t.start();
     }
 
-    public SearchTask getSearchTask(int startIndex)
+    public SearchTask getSearchTask(String term, int startIndex)
     {
-        String url = "https://www.googleapis.com/books/v1/volumes?q=car&fields=items(id,selfLink,volumeInfo/title,volumeInfo/imageLinks/smallThumbnail)&startIndex="+(startIndex * MAX_RESULTS)+"&maxResults="+MAX_RESULTS;
+//        String url = "https://www.googleapis.com/books/v1/volumes?q=car&fields=items(id,selfLink,volumeInfo/title,volumeInfo/imageLinks/smallThumbnail)&startIndex="+(startIndex * MAX_RESULTS)+"&maxResults="+MAX_RESULTS;
+        String url = String.format(SearchManager.SEARCH_URL, term, startIndex);
         System.out.println("SearchManager::getSearchTask, url: " + url);
         return new SearchTask(getContext(), url, startIndex);
     }

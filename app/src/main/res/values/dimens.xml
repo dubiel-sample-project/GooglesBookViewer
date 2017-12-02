@@ -5,8 +5,8 @@
     <dimen name="nav_header_vertical_spacing">16dp</dimen>
     <dimen name="nav_header_height">160dp</dimen>
     <dimen name="fab_margin">16dp</dimen>
-    <dimen name="small_thumbnail_width">128dp</dimen>
-    <dimen name="small_thumbnail_height">192dp</dimen>
-    <dimen name="small_width">192dp</dimen>
-    <dimen name="small_height">288dp</dimen>
+    <dimen name="small_thumbnail_width">64dp</dimen>
+    <dimen name="small_thumbnail_height">96dp</dimen>
+    <dimen name="small_width">250dp</dimen>
+    <dimen name="small_height">320dp</dimen>
     </resources>
