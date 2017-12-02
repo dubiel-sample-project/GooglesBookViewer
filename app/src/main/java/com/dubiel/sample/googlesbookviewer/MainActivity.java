@@ -91,19 +91,23 @@ public class MainActivity extends AppCompatActivity
         }
 
         public void onSuccess(BookListItems result) {
+            System.out.println("booklistitems: " + result.getStartIndex());
+
             if (result == null) {
                 latch.countDown();
                 return;
             }
 
-            BookListItem[] resultBookListItems = result.getItems();
+            bookListItemsCache.put(result.getStartIndex(), result);
 
-            int len = resultBookListItems.length;
-            for (int i = 0; i < len; i++) {
-                if(!bookListItems.containsKey(resultBookListItems[i].getId())) {
-                    bookListItems.put(resultBookListItems[i].getId(), resultBookListItems[i]);
-                }
-            }
+//            BookListItem[] resultBookListItems = result.getItems();
+//
+//            int len = resultBookListItems.length;
+//            for (int i = 0; i < len; i++) {
+//                if(!bookListItems.containsKey(resultBookListItems[i].getId())) {
+//                    bookListItems.put(resultBookListItems[i].getId(), resultBookListItems[i]);
+//                }
+//            }
 
             Log.i(TAG, "thread id done: " + Long.toString(Thread.currentThread().getId()));
             Log.i(TAG, "thread name done: " + Thread.currentThread().getName());
@@ -114,7 +118,7 @@ public class MainActivity extends AppCompatActivity
             Bundle data = new Bundle();
             data.putInt("current", (int) latch.getCount());
             data.putInt("max", max);
-            data.putInt("totalresults", len);
+//            data.putInt("totalresults", len);
 
             Message msg = messageHandler.obtainMessage(SearchManager.TASK_COMPLETE);
             msg.setData(data);
@@ -147,31 +151,33 @@ public class MainActivity extends AppCompatActivity
         RecyclerView.LayoutManager layoutManager = new LinearLayoutManager(getApplicationContext());
         recyclerView.setLayoutManager(layoutManager);
 
-        bookItemListAdapter = new BookItemListAdapter(getApplicationContext());
-        recyclerView.setAdapter(bookItemListAdapter);
-
-        bookListItems = new ConcurrentHashMap<>();
+//        bookListItems = new ConcurrentHashMap<>();
 
         bookListItemsCache = CacheBuilder.newBuilder()
-                .maximumSize(1000)
+                .maximumSize(100)
                 .build(
                         new CacheLoader<Integer, BookListItems>() {
                             public BookListItems load(Integer key) throws Exception {
-                                int startIndex = key * 40;
-                                String url = "https://www.googleapis.com/books/v1/volumes?q=car&fields=items(id,selfLink,volumeInfo/title,volumeInfo/imageLinks/smallThumbnail)&startIndex="+startIndex+"&maxResults=40";
+                                int startIndex = key * SearchManager.MAX_RESULTS;
+                                String url = "https://www.googleapis.com/books/v1/volumes?q=car&fields=items(id,selfLink,volumeInfo/title,volumeInfo/imageLinks/smallThumbnail)&startIndex="+startIndex+"&maxResults=" + SearchManager.MAX_RESULTS;
 //                                SearchTask searchTask = new SearchTask(getApplicationContext(), url);
 //                                return getBookListItems(integer);
-                                return Ion.with(getApplicationContext())
+                                BookListItems result = Ion.with(getApplicationContext())
                                         .load(url)
                                         .as(new TypeToken<BookListItems>() {
                                         }).get();
+                                bookItemListAdapter.notifyDataSetChanged();
+
+                                return result;
                             }
                         });
 
-//        mSearchManager = SearchManager.getInstance();
-//        mSearchManager.setContext(this);
-//
-//        doSearch();
+        mSearchManager = SearchManager.getInstance();
+        mSearchManager.setContext(this);
+
+        bookItemListAdapter = new BookItemListAdapter(getApplicationContext(), bookListItemsCache);
+        recyclerView.setAdapter(bookItemListAdapter);
+
         preloadCache();
     }
 
@@ -233,8 +239,8 @@ public class MainActivity extends AppCompatActivity
     }
 
     public void onResultsReady() {
-        System.out.println("MainActivity.onResultsReady, bookListItems.size: " + bookListItems.size());
-        bookItemListAdapter.setBookListItems(bookListItems.values().toArray(new BookListItem[0]));
+        System.out.println("MainActivity.onResultsReady");
+//        bookItemListAdapter.setBookListItems(bookListItemsCache);
         bookItemListAdapter.notifyDataSetChanged();
     }
 
@@ -242,21 +248,19 @@ public class MainActivity extends AppCompatActivity
         System.out.println("MainActivity.onPartialResultsReady, totalResults: " + totalResults);
     }
 
-    private void doSearch() {
+    private void preloadCache() {
+//        for(int i = 0; i < 5; i++) {
+//            try {
+//                bookListItemsCache.get(i);
+//            } catch(Exception e) {
+//                System.out.println(e.getMessage());
+//            }
+//        }
+
         List<SearchTask> tasks = new ArrayList<>();
-        tasks.add(SearchManager.getInstance().getSearchTask());
+        tasks.add(SearchManager.getInstance().getSearchTask(0));
 
         BookItemListCallback callback = new BookItemListCallback(tasks.size());
         SearchManager.getInstance().startSearch(tasks, callback, messageHandler);
-    }
-
-    private void preloadCache() {
-        for(int i = 0; i < 5; i++) {
-            try {
-                bookListItemsCache.get(i);
-            } catch(Exception e) {
-                System.out.println(e.getMessage());
-            }
-        }
     }
 }

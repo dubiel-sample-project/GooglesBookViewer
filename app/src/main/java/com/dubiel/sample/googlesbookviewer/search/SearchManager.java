@@ -23,6 +23,8 @@ public class SearchManager {
     static final public int TASK_COMPLETE = 1;
     static final public int ALL_TASK_COMPLETE = 2;
 
+    static final public int MAX_RESULTS = 40;
+
 //    public enum CATEGORY {
 //        ASSAULT,
 //        VEHICLE_THEFT,
@@ -133,11 +135,11 @@ public class SearchManager {
         t.start();
     }
 
-    public SearchTask getSearchTask()
+    public SearchTask getSearchTask(int startIndex)
     {
-        String url = "https://www.googleapis.com/books/v1/volumes?q=car&fields=items(id,selfLink,volumeInfo/title,volumeInfo/imageLinks/smallThumbnail)&startIndex=0&maxResults=40";
+        String url = "https://www.googleapis.com/books/v1/volumes?q=car&fields=items(id,selfLink,volumeInfo/title,volumeInfo/imageLinks/smallThumbnail)&startIndex="+(startIndex * MAX_RESULTS)+"&maxResults="+MAX_RESULTS;
         System.out.println("SearchManager::getSearchTask, url: " + url);
-        return new SearchTask(getContext(), url);
+        return new SearchTask(getContext(), url, startIndex);
     }
 
 //    public List<BookListItem> getResults(FutureCallback<List<List<BookListItem>>> callback) {

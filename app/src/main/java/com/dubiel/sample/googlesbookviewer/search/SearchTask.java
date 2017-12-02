@@ -16,10 +16,12 @@ public class SearchTask implements Callable<BookListItems>
 
     private Context context;
     private String url;
+    private int startIndex;
 
-    public SearchTask(Context context, String url) {
+    public SearchTask(Context context, String url, int startIndex) {
         this.context = context;
         this.url = url;
+        this.startIndex = startIndex;
     }
 
     public BookListItems call() {
@@ -27,10 +29,13 @@ public class SearchTask implements Callable<BookListItems>
             //Log.i("mapmanager", "thread id start: " + Long.toString(Thread.currentThread().getId()));
             //Log.i("mapmanager", "thread name start: " + Thread.currentThread().getName());
 
-            return Ion.with(getContext())
+            BookListItems bookListItems = Ion.with(getContext())
                     .load(getUrl())
                     .as(new TypeToken<BookListItems>() {
                     }).get();
+            bookListItems.startIndex = this.startIndex;
+
+            return bookListItems;
         } catch(InterruptedException | ExecutionException e) {
             System.out.println(e.getMessage());
             return null;
@@ -43,5 +48,9 @@ public class SearchTask implements Callable<BookListItems>
 
     public String getUrl() {
         return url;
+    }
+
+    public int getStartIndex() {
+        return startIndex;
     }
 }
