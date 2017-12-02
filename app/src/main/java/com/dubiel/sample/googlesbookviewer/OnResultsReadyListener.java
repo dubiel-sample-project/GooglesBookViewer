@@ -2,5 +2,5 @@ package com.dubiel.sample.googlesbookviewer;
 
 
 interface OnResultsReadyListener {
-    void onResultsReady();
+    void onResultsReady(boolean resetScrollPosition);
 }

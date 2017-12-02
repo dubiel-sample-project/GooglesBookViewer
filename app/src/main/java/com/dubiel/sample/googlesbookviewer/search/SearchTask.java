@@ -20,8 +20,8 @@ public class SearchTask implements Callable<BookListItems>
 
     public SearchTask(Context context, String url, int startIndex) {
         this.context = context;
-        this.url = url;
         this.startIndex = startIndex;
+        this.url = url;
     }
 
     public BookListItems call() {
