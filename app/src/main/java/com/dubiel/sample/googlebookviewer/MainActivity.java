@@ -6,6 +6,7 @@ import android.os.Handler;
 import android.os.Message;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
+import android.util.Log;
 import android.view.View;
 import android.support.v4.view.GravityCompat;
 import android.support.v4.widget.DrawerLayout;
@@ -102,6 +103,12 @@ public class MainActivity extends AppCompatActivity
                 return;
             }
 
+            Log.i(TAG, "onSuccess: " + result.getItems().length + " " + result.getStartIndex());
+
+            if(result.getItems().length == 0) {
+                return;
+            }
+
             bookListItemsCache.put(result.getStartIndex(), result);
 
 //            Log.i(TAG, "thread id done: " + Long.toString(Thread.currentThread().getId()));
@@ -114,6 +121,7 @@ public class MainActivity extends AppCompatActivity
             data.putInt("current", (int) latch.getCount());
             data.putInt("max", max);
             data.putInt("totalresults", result.getItems().length);
+            data.putInt("startindex", result.getStartIndex());
 
             Message msg = messageHandler.obtainMessage(SearchManager.TASK_COMPLETE);
             msg.setData(data);
@@ -123,6 +131,10 @@ public class MainActivity extends AppCompatActivity
         public void onFailure(Throwable thrown) {
             latch.countDown();
         }
+    }
+
+    public String getCurrentSearchTerm() {
+        return currentSearchTerm;
     }
 
     @Override
@@ -135,7 +147,7 @@ public class MainActivity extends AppCompatActivity
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
 
-        spinner=(ProgressBar)findViewById(R.id.progressBar1);
+        spinner = (ProgressBar)findViewById(R.id.progressBar1);
         spinner.setVisibility(View.GONE);
 
         DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
@@ -190,8 +202,8 @@ public class MainActivity extends AppCompatActivity
 
                 if (!cacheLoading) {
                     if (dy < 0) {
-                        int cacheKey = (int)Math.floor(firstVisibleItemPosition - 1 / SearchManager.MAX_RESULTS);
-                        if(bookListItemsCache.getIfPresent(cacheKey) instanceof BookListItems) {
+                        int cacheKey = (int)Math.floor((firstVisibleItemPosition - 1) / SearchManager.MAX_RESULTS);
+                        if(!(bookListItemsCache.getIfPresent(cacheKey) instanceof BookListItems)) {
                             updateCache(firstVisibleItemPosition - 1);
                         }
                     } else if (dy > 0 && lastVisibleItem == totalItem - 1) {
@@ -203,7 +215,7 @@ public class MainActivity extends AppCompatActivity
         });
 
         bookListItemsCache = CacheBuilder.newBuilder()
-                .maximumSize(4)
+                .maximumSize(8)
 //                .expireAfterAccess(1, TimeUnit.MINUTES)
                 .build();
 
@@ -237,7 +249,6 @@ public class MainActivity extends AppCompatActivity
         searchView.setOnQueryTextListener(new SearchView.OnQueryTextListener() {
             @Override
             public boolean onQueryTextSubmit(String query) {
-                System.out.println("onQueryTextSubmit: " + query);
                 currentSearchTerm = query;
                 search();
                 return true;
@@ -279,6 +290,8 @@ public class MainActivity extends AppCompatActivity
     }
 
     public void onResultsReady(boolean resetScrollPosition) {
+        System.out.println("onResultsReady: " + bookListItemsCache.size());
+
         cacheLoading = false;
         spinner.setVisibility(View.GONE);
         bookItemListAdapter.notifyDataSetChanged();
@@ -288,7 +301,7 @@ public class MainActivity extends AppCompatActivity
         }
     }
 
-    public void onPartialResultsReady(int current, int max, int totalResults) {
+    public void onPartialResultsReady(int current, int max, int totalResults, int startIndex) {
     }
 
     private void search() {
@@ -316,7 +329,8 @@ public class MainActivity extends AppCompatActivity
         System.out.println("cacheKey: " + cacheKey);
         System.out.println("cache.size: " + bookListItemsCache.size());
 
-        if(bookListItemsCache.getIfPresent(cacheKey) instanceof BookListItems) {
+        BookListItems bookListItems = bookListItemsCache.getIfPresent(cacheKey);
+        if(bookListItems instanceof BookListItems) {
             cacheLoading = false;
             spinner.setVisibility(View.GONE);
             return;

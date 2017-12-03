@@ -88,7 +88,22 @@ public class BookItemListAdapter extends RecyclerView.Adapter<BookItemListAdapte
 
     @Override
     public int getItemCount() {
-        return (int)bookListItems.size() * SearchManager.MAX_RESULTS;
+        if(bookListItems.size() == 0) {
+            return 0;
+        }
+
+        long itemCount = (bookListItems.size() + 1) * SearchManager.MAX_RESULTS;
+        System.out.println("itemCount: " + itemCount);
+        System.out.println("getifpresent: " + (bookListItems.getIfPresent(bookListItems.size() - 1) instanceof BookListItems));
+
+        return (int)itemCount;
+
+//        long itemCount = (bookListItems.size() - 1) * SearchManager.MAX_RESULTS;
+//        if(bookListItems.getIfPresent(bookListItems.size() - 1) instanceof BookListItems) {
+//            itemCount += bookListItems.getIfPresent(bookListItems.size() - 1).getItems().length;
+//        }
+//        System.out.println("itemCount: " + itemCount);
+//        return (int)itemCount;
     }
 
     public class ViewHolder extends RecyclerView.ViewHolder{

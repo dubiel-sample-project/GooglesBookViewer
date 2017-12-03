@@ -21,22 +21,19 @@ public class SearchTask implements Callable<BookListItems>
         this.context = context;
         this.startIndex = startIndex;
         this.url = url;
+
+        System.out.println("SearchTask, url: " + url);
     }
 
     public BookListItems call() {
         try {
-            //Log.i("mapmanager", "thread id start: " + Long.toString(Thread.currentThread().getId()));
-            //Log.i("mapmanager", "thread name start: " + Thread.currentThread().getName());
-
             BookListItems bookListItems = Ion.with(getContext())
                     .load(getUrl())
                     .as(new TypeToken<BookListItems>() {
                     }).get();
             bookListItems.startIndex = this.startIndex;
-
             return bookListItems;
         } catch(InterruptedException | ExecutionException e) {
-            System.out.println(e.getMessage());
             return null;
         }
     }
