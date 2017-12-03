@@ -9,13 +9,15 @@
     <string name="popular_searches">Popular Searches</string>
     <string name="no_description_available">No Description available</string>
     <string-array name="category_array">
-        <item>cars</item>
+        <item>cats</item>
         <item>nature</item>
         <item>religion</item>
         <item>politics</item>
+        <item>cars</item>
         <item>london</item>
         <item>california</item>
         <item>zurich</item>
+        <item>tokyo</item>
         <item>google</item>
         <item>technology</item>
         <item>android</item>

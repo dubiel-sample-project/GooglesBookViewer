@@ -1,9 +1,8 @@
-package com.dubiel.sample.googlesbookviewer;
+package com.dubiel.sample.googlebookviewer;
 
 
 import android.content.Context;
 import android.content.Intent;
-import android.os.Bundle;
 import android.support.v7.widget.RecyclerView;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -12,15 +11,14 @@ import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.TextView;
 
-import com.dubiel.sample.googlesbookviewer.search.SearchManager;
-import com.dubiel.sample.googlesbookviewer.search.searchitem.BookListItem;
+import com.dubiel.sample.googlebookviewer.bookdetail.BookDetailActivity;
+import com.dubiel.sample.googlebookviewer.bookdetail.BookDetailActivityFragment;
+import com.dubiel.sample.googlebookviewer.search.SearchManager;
+import com.dubiel.sample.googlebookviewer.search.searchitem.BookListItem;
 
-import com.dubiel.sample.googlesbookviewer.search.searchitem.BookListItems;
+import com.dubiel.sample.googlebookviewer.search.searchitem.BookListItems;
 import com.google.common.cache.Cache;
-import com.google.common.cache.LoadingCache;
 import com.squareup.picasso.Picasso;
-
-import java.util.concurrent.ExecutionException;
 
 public class BookItemListAdapter extends RecyclerView.Adapter<BookItemListAdapter.ViewHolder> {
 

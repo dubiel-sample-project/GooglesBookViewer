@@ -1,4 +1,4 @@
-package com.dubiel.sample.googlesbookviewer.search.searchitem;
+package com.dubiel.sample.googlebookviewer.search.searchitem;
 
 
 public class ImageLinks {

@@ -1,4 +1,4 @@
-package com.dubiel.sample.googlesbookviewer;
+package com.dubiel.sample.googlebookviewer;
 
 import android.content.Context;
 import android.os.Bundle;
@@ -6,7 +6,6 @@ import android.os.Handler;
 import android.os.Message;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
-import android.util.Log;
 import android.view.View;
 import android.support.v4.view.GravityCompat;
 import android.support.v4.widget.DrawerLayout;
@@ -18,18 +17,17 @@ import android.view.MenuItem;
 import android.widget.ProgressBar;
 import android.widget.SearchView;
 
-import com.dubiel.sample.googlesbookviewer.search.*;
-import com.dubiel.sample.googlesbookviewer.search.searchitem.*;
+import com.dubiel.sample.googlebookviewer.search.*;
+import com.dubiel.sample.googlebookviewer.search.searchitem.*;
 import com.google.common.cache.Cache;
 import com.google.common.cache.CacheBuilder;
 import com.google.common.util.concurrent.FutureCallback;
-import com.google.gson.reflect.TypeToken;
-import com.koushikdutta.ion.Ion;
 
 import java.lang.ref.WeakReference;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.TimeUnit;
 
 import javax.inject.Inject;
 
@@ -184,41 +182,30 @@ public class MainActivity extends AppCompatActivity
                 LinearLayoutManager layoutManager = (LinearLayoutManager) recyclerView.getLayoutManager();
                 int totalItem = layoutManager.getItemCount();
                 int lastVisibleItem = layoutManager.findLastVisibleItemPosition();
+                int firstVisibleItemPosition = layoutManager.findFirstVisibleItemPosition();
 
-                if (!cacheLoading && lastVisibleItem == totalItem - 1) {
-                    System.out.println("lastVisibleItem: " + lastVisibleItem);
-                    updateCache(totalItem);
+                System.out.println("dx: " + dx);
+                System.out.println("dy: " + dy);
+                System.out.println("firstVisibleItemPosition: " + firstVisibleItemPosition);
+
+                if (!cacheLoading) {
+                    if (dy < 0) {
+                        int cacheKey = (int)Math.floor(firstVisibleItemPosition - 1 / SearchManager.MAX_RESULTS);
+                        if(bookListItemsCache.getIfPresent(cacheKey) instanceof BookListItems) {
+                            updateCache(firstVisibleItemPosition - 1);
+                        }
+                    } else if (dy > 0 && lastVisibleItem == totalItem - 1) {
+                        System.out.println("lastVisibleItem: " + lastVisibleItem);
+                        updateCache(totalItem);
+                    }
                 }
             }
         });
 
         bookListItemsCache = CacheBuilder.newBuilder()
-                .maximumSize(20)
+                .maximumSize(4)
+//                .expireAfterAccess(1, TimeUnit.MINUTES)
                 .build();
-
-//                        new CacheLoader<Integer, BookListItems>() {
-//                            public BookListItems load(Integer key) throws Exception {
-//                                int startIndex = key * SearchManager.MAX_RESULTS;
-//                                String url = String.format(SearchManager.SEARCH_URL, currentSearchTerm, startIndex);
-////                                "https://www.googleapis.com/books/v1/volumes?q=car&fields=items(id,selfLink,volumeInfo/title,volumeInfo/imageLinks/smallThumbnail)&startIndex="+startIndex+"&maxResults=" + SearchManager.MAX_RESULTS;
-////                                SearchTask searchTask = new SearchTask(getApplicationContext(), url);
-////                                return getBookListItems(integer);
-//                                Ion.with(getApplicationContext())
-//                                        .load(url)
-//                                        .as(new TypeToken<BookListItems>() {
-//                                        }).setCallback(new com.koushikdutta.async.future.FutureCallback<BookDetailItems>() {
-//                                            @Override
-//                                            public void onCompleted(Exception e, BookDetailItems bookDetailItem) {
-//                                                ;
-//                                            }
-//                                        });
-//
-////                                bookItemListAdapter.notifyItemInserted(key);
-//                                spinner.setVisibility(View.GONE);
-//
-//                                return result;
-//                            }
-//                        });
 
         searchManager.setContext(this);
 
@@ -309,12 +296,12 @@ public class MainActivity extends AppCompatActivity
         bookListItemsCache.invalidateAll();
 
         List<SearchTask> tasks = new ArrayList<>();
-        for(int i = 0; i < 5; i++) {
+        for(int i = 0; i < 2; i++) {
             tasks.add(searchManager.getSearchTask(currentSearchTerm, i));
         }
 
         BookItemListCallback callback = new BookItemListCallback(tasks.size());
-        searchManager.startSearch(tasks, callback, messageHandler);
+        searchManager.startSearch(tasks, callback, messageHandler, true);
     }
 
     private void updateCache(int key) {
@@ -323,18 +310,19 @@ public class MainActivity extends AppCompatActivity
         }
 
         cacheLoading = true;
-        spinner.setVisibility(View.VISIBLE);
-
         int cacheKey = (int)Math.floor(key / SearchManager.MAX_RESULTS);
+
+        System.out.println("key: " + key);
+        System.out.println("cacheKey: " + cacheKey);
+        System.out.println("cache.size: " + bookListItemsCache.size());
+
         if(bookListItemsCache.getIfPresent(cacheKey) instanceof BookListItems) {
             cacheLoading = false;
             spinner.setVisibility(View.GONE);
             return;
         }
 
-        System.out.println("key: " + key);
-        System.out.println("cacheKey: " + cacheKey);
-        System.out.println("cache.size: " + bookListItemsCache.size());
+        spinner.setVisibility(View.VISIBLE);
 
         String url = SearchManager.createUrl(currentSearchTerm, key);
         System.out.println("updateCache, url: " + url);
@@ -343,28 +331,6 @@ public class MainActivity extends AppCompatActivity
         tasks.add(searchManager.getSearchTask(currentSearchTerm, cacheKey));
 
         BookItemListCallback callback = new BookItemListCallback(tasks.size());
-        searchManager.startSearch(tasks, callback, messageHandler);
-
-//        Ion.with(getApplicationContext())
-//            .load(url)
-//            .as(new TypeToken<BookListItems>() {
-//            }).setCallback(new com.koushikdutta.async.future.FutureCallback<BookListItems>() {
-//                @Override
-//                public void onCompleted(Exception e, BookListItems bookListItems) {
-//                    if(e != null || bookListItems == null) {
-//                        System.out.println(e.getMessage());
-//                        Log.i(MainActivity.TAG, "book list items for start index " + cacheKey + " not found");
-//                        return;
-//                    }
-//
-//                    bookListItemsCache.put(cacheKey, bookListItems);
-//                    System.out.println("updateCache, onCompleted: " + bookListItemsCache.size());
-//
-////                    bookItemListAdapter.notifyItemChanged(cacheKey * SearchManager.MAX_RESULTS);
-//                    bookItemListAdapter.notifyDataSetChanged();
-//                    cacheLoading = false;
-//                    spinner.setVisibility(View.GONE);
-//                }
-//            });
+        searchManager.startSearch(tasks, callback, messageHandler, false);
     }
 }

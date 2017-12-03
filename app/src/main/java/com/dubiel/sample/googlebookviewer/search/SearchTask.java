@@ -1,12 +1,11 @@
-package com.dubiel.sample.googlesbookviewer.search;
+package com.dubiel.sample.googlebookviewer.search;
 
 import android.content.Context;
 
-import com.dubiel.sample.googlesbookviewer.search.searchitem.BookListItems;
+import com.dubiel.sample.googlebookviewer.search.searchitem.BookListItems;
 import com.google.gson.reflect.TypeToken;
 import com.koushikdutta.ion.Ion;
 
-import java.util.List;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutionException;
 

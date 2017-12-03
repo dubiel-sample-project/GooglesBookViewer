@@ -1,10 +1,12 @@
-package com.dubiel.sample.googlesbookviewer.search;
+package com.dubiel.sample.googlebookviewer.search;
 
 import android.content.Context;
+import android.os.Bundle;
 import android.os.Handler;
+import android.os.Message;
 
-import com.dubiel.sample.googlesbookviewer.MainActivity;
-import com.dubiel.sample.googlesbookviewer.search.searchitem.BookListItems;
+import com.dubiel.sample.googlebookviewer.MainActivity;
+import com.dubiel.sample.googlebookviewer.search.searchitem.BookListItems;
 import com.google.common.util.concurrent.Futures;
 import com.google.common.util.concurrent.ListenableFuture;
 import com.google.common.util.concurrent.ListeningExecutorService;
@@ -57,7 +59,10 @@ public class SearchManager {
         this.context = context;
     }
 
-    public void startSearch(final List<SearchTask> tasks, final MainActivity.BookItemListCallback callback, final Handler handler)
+    public void startSearch(final List<SearchTask> tasks,
+                            final MainActivity.BookItemListCallback callback,
+                            final Handler handler,
+                            final Boolean resetScrollPosition)
     {
         switch(mCurrentStatus) {
             case STARTED:
@@ -81,7 +86,13 @@ public class SearchManager {
 
                 try {
                     latch.await(10, TimeUnit.SECONDS);
-                    handler.obtainMessage(SearchManager.ALL_TASK_COMPLETE).sendToTarget();
+
+                    Bundle data = new Bundle();
+                    data.putBoolean("resetscroll", resetScrollPosition);
+
+                    Message msg = handler.obtainMessage(SearchManager.ALL_TASK_COMPLETE);
+                    msg.setData(data);
+                    msg.sendToTarget();
                 } catch (InterruptedException e) {
                     mCurrentStatus = STATUS.FAILED;
                 } catch (Exception e) {

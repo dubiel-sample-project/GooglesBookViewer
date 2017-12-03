@@ -1,4 +1,4 @@
-package com.dubiel.sample.googlesbookviewer.dagger;
+package com.dubiel.sample.googlebookviewer.dagger;
 
 import android.app.Activity;
 import android.app.Application;

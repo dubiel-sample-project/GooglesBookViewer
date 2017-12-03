@@ -1,16 +1,14 @@
-package com.dubiel.sample.googlesbookviewer.search.searchitem;
+package com.dubiel.sample.googlebookviewer.search.searchitem;
 
-
-
-public class BookDetailItem {
+public class BookListItem {
     public String id;
     public String selfLink;
     public VolumeInfo volumeInfo;
 
-    public BookDetailItem() {
+    public BookListItem() {
     }
 
-    public BookDetailItem(String id, String selfLink, VolumeInfo volumeInfo) {
+    public BookListItem(String id, String selfLink, VolumeInfo volumeInfo) {
         this.id = id;
         this.selfLink = selfLink;
         this.volumeInfo = volumeInfo;

@@ -1,4 +1,4 @@
-package com.dubiel.sample.googlesbookviewer;
+package com.dubiel.sample.googlebookviewer.bookdetail;
 
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
@@ -11,7 +11,8 @@ import android.webkit.WebView;
 import android.widget.ImageView;
 import android.widget.TextView;
 
-import com.dubiel.sample.googlesbookviewer.search.searchitem.BookDetailItem;
+import com.dubiel.sample.googlebookviewer.R;
+import com.dubiel.sample.googlebookviewer.search.searchitem.BookDetailItem;
 import com.google.common.base.Joiner;
 import com.google.gson.reflect.TypeToken;
 import com.koushikdutta.async.future.FutureCallback;
@@ -35,7 +36,6 @@ public class BookDetailActivityFragment extends Fragment {
         super.onCreate(savedInstanceState);
 
         if (getArguments().containsKey(ARG_SELF_LINK)) {
-
             smallImageWidth = getContext().getResources().getInteger(R.integer.small_image_width);
             smallImageHeight = getContext().getResources().getInteger(R.integer.small_image_height);
 
