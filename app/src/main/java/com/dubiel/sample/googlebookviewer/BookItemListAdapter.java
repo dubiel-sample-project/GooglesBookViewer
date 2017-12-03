@@ -45,16 +45,16 @@ public class BookItemListAdapter extends RecyclerView.Adapter<BookItemListAdapte
 
     @Override
     public void onBindViewHolder(final BookItemListAdapter.ViewHolder viewHolder, int i) {
-        System.out.println("onBindViewHolder: " + i);
+//        System.out.println("onBindViewHolder: " + i);
 
         int key = (int)Math.floor(i / SearchManager.MAX_RESULTS);
-        System.out.println("key: " + key);
+//        System.out.println("key: " + key);
 
         try {
             BookListItems currentBookListItems = bookListItems.getIfPresent(key);
 
             int bookListItemIndex = i % SearchManager.MAX_RESULTS;
-            System.out.println("bookListItemIndex: " + bookListItemIndex);
+//            System.out.println("bookListItemIndex: " + bookListItemIndex);
 
             if(bookListItemIndex >= currentBookListItems.getItems().length) {
                 return;
@@ -83,7 +83,7 @@ public class BookItemListAdapter extends RecyclerView.Adapter<BookItemListAdapte
                 }
             });
         } catch(Exception e) {
-            System.out.println(e.getMessage());
+            Log.e(BookItemListAdapter.TAG, e.getMessage());
         }
     }
 

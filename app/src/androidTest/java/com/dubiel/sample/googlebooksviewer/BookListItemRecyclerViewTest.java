@@ -28,7 +28,9 @@ import static android.support.test.espresso.action.ViewActions.click;
 import static android.support.test.espresso.assertion.ViewAssertions.matches;
 import static android.support.test.espresso.intent.Intents.intended;
 import static android.support.test.espresso.intent.matcher.IntentMatchers.hasComponent;
+import static android.support.test.espresso.matcher.ViewMatchers.hasDescendant;
 import static android.support.test.espresso.matcher.ViewMatchers.isDisplayed;
+import static android.support.test.espresso.matcher.ViewMatchers.withId;
 import static android.support.test.espresso.matcher.ViewMatchers.withText;
 
 
@@ -42,17 +44,17 @@ public class BookListItemRecyclerViewTest {
     public ActivityTestRule<MainActivity> activityRule = new ActivityTestRule<>(
             MainActivity.class);
 
-    @Rule
-    public ActivityTestRule<BookDetailActivity> bookDetailActivityRule = new ActivityTestRule<>(
-            BookDetailActivity.class);
+//    @Rule
+//    public ActivityTestRule<BookDetailActivity> bookDetailActivityRule = new ActivityTestRule<>(
+//            BookDetailActivity.class);
 
     @Test
-        public void scrollToItemPosition_checkBookDetailActivityIntent() {
+    public void scrollToItemPosition_checkBookDetailActivityIntent() {
         onView(ViewMatchers.withId(R.id.book_item_list_recycler_view))
                 .perform(RecyclerViewActions.actionOnItemAtPosition(ITEM_POSITION, click()));
         SystemClock.sleep(5000);
-        intended(hasComponent(new ComponentName(getTargetContext(), BookDetailActivity.class)));
 
+        intended(hasComponent(new ComponentName(getTargetContext(), BookDetailActivity.class)));
     }
 
     @Test
@@ -60,6 +62,9 @@ public class BookListItemRecyclerViewTest {
         onView(ViewMatchers.withId(R.id.book_item_list_recycler_view))
                 .perform(RecyclerViewActions.actionOnItemAtPosition(ITEM_POSITION, click()));
         SystemClock.sleep(5000);
+
+        onView(withId(R.id.book_item_list_recycler_view))
+                .check(matches(hasDescendant(withText("Cats"))));
 
 //        String itemElementText = activityRule.getActivity().getResources().getString(
 //            R.string.) + String.valueOf(ITEM_BELOW_THE_FOLD);

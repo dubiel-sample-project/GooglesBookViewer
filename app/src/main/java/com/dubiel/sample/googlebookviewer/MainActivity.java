@@ -349,18 +349,22 @@ public class MainActivity extends AppCompatActivity
     }
 
     private void updateBookItemListAdapterItemCount() {
+        if(bookListItemsCache.asMap().keySet().size() == 0) {
+            bookItemListAdapter.setItemCount(0);
+            return;
+        }
+
         int maxKey = Collections.max(bookListItemsCache.asMap().keySet());
 
-        System.out.println("updateBookItemListAdapterItemCount, maxKey: " + maxKey);
-        System.out.println("updateBookItemListAdapterItemCount, maxKey: " + maxKey);
-        System.out.println("updateBookItemListAdapterItemCount, getifpresent: " + (bookListItemsCache.getIfPresent(maxKey) instanceof BookListItems));
+//        System.out.println("updateBookItemListAdapterItemCount, maxKey: " + maxKey);
+//        System.out.println("updateBookItemListAdapterItemCount, getifpresent: " + (bookListItemsCache.getIfPresent(maxKey) instanceof BookListItems));
 
         int itemCount = maxKey * SearchManager.MAX_RESULTS;
         if(bookListItemsCache.getIfPresent(maxKey) instanceof BookListItems) {
-            System.out.println("updateBookItemListAdapterItemCount, length: " + bookListItemsCache.getIfPresent(maxKey).getItems().length);
+//            System.out.println("updateBookItemListAdapterItemCount, length: " + bookListItemsCache.getIfPresent(maxKey).getItems().length);
             itemCount += bookListItemsCache.getIfPresent(maxKey).getItems().length;
         }
-        System.out.println("updateBookItemListAdapterItemCount, itemCount: " + itemCount);
+//        System.out.println("updateBookItemListAdapterItemCount, itemCount: " + itemCount);
 
         bookItemListAdapter.setItemCount(itemCount);
     }

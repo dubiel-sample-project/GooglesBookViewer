@@ -38,8 +38,8 @@ dependencies {
     compile 'com.android.support:cardview-v7:' + rootProject.supportLibVersion
 //    compile 'com.android.support:support-v4:' + rootProject.supportLibVersion
     compile 'com.koushikdutta.ion:ion:2.+'
-    compile 'com.google.guava:guava:19.0'
-//    compile 'com.google.guava:guava:23.5-android'
+//    compile 'com.google.guava:guava:19.0'
+    compile 'com.google.guava:guava:23.5-android'
     compile 'com.squareup.picasso:picasso:2.3.2'
     compile 'com.google.dagger:dagger:' + rootProject.daggerVersion
     compile 'com.google.dagger:dagger-android:' + rootProject.daggerVersion

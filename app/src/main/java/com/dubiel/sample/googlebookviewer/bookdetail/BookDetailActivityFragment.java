@@ -61,7 +61,6 @@ public class BookDetailActivityFragment extends Fragment {
                 }).setCallback(new FutureCallback<BookDetailItem>() {
             @Override
             public void onCompleted(Exception e, BookDetailItem bookDetailItem) {
-
                 try {
                     Picasso.with(getContext()).load(bookDetailItem.getVolumeInfo().getImageLinks().getSmall())
                             .resize(smallImageWidth, smallImageHeight)

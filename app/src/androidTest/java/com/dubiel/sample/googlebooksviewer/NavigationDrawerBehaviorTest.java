@@ -26,6 +26,8 @@ import static android.support.test.espresso.action.ViewActions.pressKey;
 import static android.support.test.espresso.action.ViewActions.swipeRight;
 import static android.support.test.espresso.action.ViewActions.typeText;
 import static android.support.test.espresso.contrib.DrawerMatchers.isClosed;
+import static android.support.test.espresso.matcher.ViewMatchers.assertThat;
+import static android.support.test.espresso.matcher.ViewMatchers.hasDescendant;
 import static android.support.test.espresso.matcher.ViewMatchers.isAssignableFrom;
 import static android.support.test.espresso.matcher.ViewMatchers.withText;
 import static android.support.test.espresso.matcher.ViewMatchers.withId;
@@ -44,13 +46,31 @@ public class NavigationDrawerBehaviorTest {
 
     @Before
     public void initValidString() {
-        searchString = "london";
+        searchString = "London";
     }
 
     @Test
     public void openDrawer_sameActivity() {
         onView(withId(R.id.drawer_layout))
-                .check(matches(isClosed(Gravity.LEFT))) // Left Drawer should be closed.
+                .check(matches(isClosed(Gravity.LEFT)))
+                .perform(DrawerActions.open());
+    }
+
+    @Test
+    public void openDrawer_clickItem() {
+        onView(withId(R.id.drawer_layout))
+                .check(matches(isClosed(Gravity.LEFT)))
+                .perform(DrawerActions.open());
+        SystemClock.sleep(1000);
+
+        onView(ViewMatchers.withId(R.id.left_drawer))
+                .perform(RecyclerViewActions.actionOnItemAtPosition(5, click()));
+    }
+
+    @Test
+    public void openDrawer_clickItemAndConfirmSearch() {
+        onView(withId(R.id.drawer_layout))
+                .check(matches(isClosed(Gravity.LEFT)))
                 .perform(DrawerActions.open());
         SystemClock.sleep(1000);
 
@@ -58,12 +78,7 @@ public class NavigationDrawerBehaviorTest {
                 .perform(RecyclerViewActions.actionOnItemAtPosition(5, click()));
         SystemClock.sleep(5000);
 
-        onView(isAssignableFrom(EditText.class))
-                .check(matches(withText(activityRule.getActivity().getCurrentSearchTerm())));
-
-//        onView(isAssignableFrom(EditText.class))
-//                .check(matches(withText(searchString)));
-//        onView(isAssignableFrom(EditText.class))
-//                .check(matches(withText(activityRule.getActivity().getCurrentSearchTerm())));
+        onView(withId(R.id.book_item_list_recycler_view))
+                .check(matches(hasDescendant(withText(searchString))));
     }
 }
