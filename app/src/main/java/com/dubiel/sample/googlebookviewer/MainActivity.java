@@ -6,7 +6,6 @@ import android.os.Handler;
 import android.os.Message;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
-import android.util.Log;
 import android.view.View;
 import android.support.v4.view.GravityCompat;
 import android.support.v4.widget.DrawerLayout;
@@ -22,13 +21,15 @@ import com.dubiel.sample.googlebookviewer.search.*;
 import com.dubiel.sample.googlebookviewer.search.searchitem.*;
 import com.google.common.cache.Cache;
 import com.google.common.cache.CacheBuilder;
+import com.google.common.cache.RemovalListener;
+import com.google.common.cache.RemovalNotification;
 import com.google.common.util.concurrent.FutureCallback;
 
 import java.lang.ref.WeakReference;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.concurrent.CountDownLatch;
-import java.util.concurrent.TimeUnit;
 
 import javax.inject.Inject;
 
@@ -40,10 +41,10 @@ public class MainActivity extends AppCompatActivity
         OnResultsReadyListener {
 
     static final private String TAG = "MainActivity";
+    static final private int CACHE_MAX_SIZE = 5;
 
     private final MessageHandler messageHandler = new MessageHandler(this);
 
-//    private LoadingCache<Integer, BookListItems> bookListItemsCache;
     private Cache<Integer, BookListItems> bookListItemsCache;
 
     @Inject
@@ -69,7 +70,8 @@ public class MainActivity extends AppCompatActivity
                 Bundle data = msg.getData();
                 switch (msg.what) {
                     case SearchManager.TASK_COMPLETE:
-                        mainActivity.onPartialResultsReady(data.getInt("current"), data.getInt("max"), data.getInt("totalresults"));
+                        mainActivity.onPartialResultsReady(data.getInt("current"), data.getInt("max"),
+                                data.getInt("totalresults"), data.getInt("startindex"));
                         break;
                     case SearchManager.ALL_TASK_COMPLETE:
                         mainActivity.onResultsReady(data.getBoolean("resetscroll"));
@@ -103,18 +105,11 @@ public class MainActivity extends AppCompatActivity
                 return;
             }
 
-            Log.i(TAG, "onSuccess: " + result.getItems().length + " " + result.getStartIndex());
-
             if(result.getItems().length == 0) {
                 return;
             }
 
             bookListItemsCache.put(result.getStartIndex(), result);
-
-//            Log.i(TAG, "thread id done: " + Long.toString(Thread.currentThread().getId()));
-//            Log.i(TAG, "thread name done: " + Thread.currentThread().getName());
-//            Log.i(TAG, "latch count: " + latch.getCount());
-
             latch.countDown();
 
             Bundle data = new Bundle();
@@ -186,19 +181,18 @@ public class MainActivity extends AppCompatActivity
         recyclerView.setLayoutManager(layoutManager);
 
         recyclerView.setOnScrollListener(new RecyclerView.OnScrollListener() {
-
             @Override
             public void onScrolled(RecyclerView recyclerView, int dx, int dy) {
                 super.onScrolled(recyclerView, dx, dy);
 
                 LinearLayoutManager layoutManager = (LinearLayoutManager) recyclerView.getLayoutManager();
-                int totalItem = layoutManager.getItemCount();
-                int lastVisibleItem = layoutManager.findLastVisibleItemPosition();
+//                int totalItem = layoutManager.getItemCount();
                 int firstVisibleItemPosition = layoutManager.findFirstVisibleItemPosition();
+                int lastVisibleItem = layoutManager.findLastVisibleItemPosition();
 
-                System.out.println("dx: " + dx);
-                System.out.println("dy: " + dy);
-                System.out.println("firstVisibleItemPosition: " + firstVisibleItemPosition);
+//                System.out.println("dx: " + dx);
+//                System.out.println("dy: " + dy);
+//                System.out.println("firstVisibleItemPosition: " + firstVisibleItemPosition);
 
                 if (!cacheLoading) {
                     if (dy < 0) {
@@ -206,17 +200,23 @@ public class MainActivity extends AppCompatActivity
                         if(!(bookListItemsCache.getIfPresent(cacheKey) instanceof BookListItems)) {
                             updateCache(firstVisibleItemPosition - 1);
                         }
-                    } else if (dy > 0 && lastVisibleItem == totalItem - 1) {
-                        System.out.println("lastVisibleItem: " + lastVisibleItem);
-                        updateCache(totalItem);
+                    } else if (dy > 0) {
+                        int cacheKey = (int)Math.floor((lastVisibleItem + 1) / SearchManager.MAX_RESULTS);
+                        if(!(bookListItemsCache.getIfPresent(cacheKey) instanceof BookListItems)) {
+                            updateCache(lastVisibleItem + 1);
+                        }
                     }
                 }
             }
         });
 
         bookListItemsCache = CacheBuilder.newBuilder()
-                .maximumSize(8)
-//                .expireAfterAccess(1, TimeUnit.MINUTES)
+                .maximumSize(CACHE_MAX_SIZE)
+                .removalListener(new RemovalListener<Integer, BookListItems>() {
+                    public void onRemoval(RemovalNotification<Integer, BookListItems> removalNotification) {
+                        updateBookItemListAdapterItemCount();
+                    }
+                })
                 .build();
 
         searchManager.setContext(this);
@@ -290,8 +290,6 @@ public class MainActivity extends AppCompatActivity
     }
 
     public void onResultsReady(boolean resetScrollPosition) {
-        System.out.println("onResultsReady: " + bookListItemsCache.size());
-
         cacheLoading = false;
         spinner.setVisibility(View.GONE);
         bookItemListAdapter.notifyDataSetChanged();
@@ -302,6 +300,8 @@ public class MainActivity extends AppCompatActivity
     }
 
     public void onPartialResultsReady(int current, int max, int totalResults, int startIndex) {
+        cacheLoading = false;
+        updateBookItemListAdapterItemCount();
     }
 
     private void search() {
@@ -309,7 +309,7 @@ public class MainActivity extends AppCompatActivity
         bookListItemsCache.invalidateAll();
 
         List<SearchTask> tasks = new ArrayList<>();
-        for(int i = 0; i < 2; i++) {
+        for(int i = 0; i < CACHE_MAX_SIZE; i++) {
             tasks.add(searchManager.getSearchTask(currentSearchTerm, i));
         }
 
@@ -325,12 +325,12 @@ public class MainActivity extends AppCompatActivity
         cacheLoading = true;
         int cacheKey = (int)Math.floor(key / SearchManager.MAX_RESULTS);
 
-        System.out.println("key: " + key);
-        System.out.println("cacheKey: " + cacheKey);
-        System.out.println("cache.size: " + bookListItemsCache.size());
+//        System.out.println("key: " + key);
+//        System.out.println("cacheKey: " + cacheKey);
+//        System.out.println("cache.size: " + bookListItemsCache.size());
 
-        BookListItems bookListItems = bookListItemsCache.getIfPresent(cacheKey);
-        if(bookListItems instanceof BookListItems) {
+//        BookListItems bookListItems = bookListItemsCache.getIfPresent(cacheKey);
+        if(bookListItemsCache.getIfPresent(cacheKey) instanceof BookListItems) {
             cacheLoading = false;
             spinner.setVisibility(View.GONE);
             return;
@@ -338,13 +338,30 @@ public class MainActivity extends AppCompatActivity
 
         spinner.setVisibility(View.VISIBLE);
 
-        String url = SearchManager.createUrl(currentSearchTerm, key);
-        System.out.println("updateCache, url: " + url);
+//        String url = SearchManager.createUrl(currentSearchTerm, key);
+//        System.out.println("updateCache, url: " + url);
 
         List<SearchTask> tasks = new ArrayList<>();
         tasks.add(searchManager.getSearchTask(currentSearchTerm, cacheKey));
 
         BookItemListCallback callback = new BookItemListCallback(tasks.size());
         searchManager.startSearch(tasks, callback, messageHandler, false);
+    }
+
+    private void updateBookItemListAdapterItemCount() {
+        int maxKey = Collections.max(bookListItemsCache.asMap().keySet());
+
+        System.out.println("updateBookItemListAdapterItemCount, maxKey: " + maxKey);
+        System.out.println("updateBookItemListAdapterItemCount, maxKey: " + maxKey);
+        System.out.println("updateBookItemListAdapterItemCount, getifpresent: " + (bookListItemsCache.getIfPresent(maxKey) instanceof BookListItems));
+
+        int itemCount = maxKey * SearchManager.MAX_RESULTS;
+        if(bookListItemsCache.getIfPresent(maxKey) instanceof BookListItems) {
+            System.out.println("updateBookItemListAdapterItemCount, length: " + bookListItemsCache.getIfPresent(maxKey).getItems().length);
+            itemCount += bookListItemsCache.getIfPresent(maxKey).getItems().length;
+        }
+        System.out.println("updateBookItemListAdapterItemCount, itemCount: " + itemCount);
+
+        bookItemListAdapter.setItemCount(itemCount);
     }
 }

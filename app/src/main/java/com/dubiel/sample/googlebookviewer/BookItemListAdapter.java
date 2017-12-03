@@ -27,6 +27,7 @@ public class BookItemListAdapter extends RecyclerView.Adapter<BookItemListAdapte
     private Context context;
     private Cache<Integer, BookListItems> bookListItems;
     private int smallThumbnailWidth, smallThumbnailHeight;
+    private int itemCount;
 
     public BookItemListAdapter(Context context, Cache<Integer, BookListItems> bookListItems) {
         this.context = context;
@@ -91,12 +92,15 @@ public class BookItemListAdapter extends RecyclerView.Adapter<BookItemListAdapte
         if(bookListItems.size() == 0) {
             return 0;
         }
+//        System.out.println("itemCount: " + itemCount);
 
-        long itemCount = (bookListItems.size() + 1) * SearchManager.MAX_RESULTS;
-        System.out.println("itemCount: " + itemCount);
-        System.out.println("getifpresent: " + (bookListItems.getIfPresent(bookListItems.size() - 1) instanceof BookListItems));
+        return itemCount;
 
-        return (int)itemCount;
+//        long itemCount = (bookListItems.size() + 1) * SearchManager.MAX_RESULTS;
+//        System.out.println("itemCount: " + itemCount);
+//        System.out.println("getifpresent: " + (bookListItems.getIfPresent(bookListItems.size() - 1) instanceof BookListItems));
+//
+//        return (int)itemCount;
 
 //        long itemCount = (bookListItems.size() - 1) * SearchManager.MAX_RESULTS;
 //        if(bookListItems.getIfPresent(bookListItems.size() - 1) instanceof BookListItems) {
@@ -104,6 +108,10 @@ public class BookItemListAdapter extends RecyclerView.Adapter<BookItemListAdapte
 //        }
 //        System.out.println("itemCount: " + itemCount);
 //        return (int)itemCount;
+    }
+
+    public void setItemCount(int itemCount) {
+        this.itemCount = itemCount;
     }
 
     public class ViewHolder extends RecyclerView.ViewHolder{
@@ -120,6 +128,14 @@ public class BookItemListAdapter extends RecyclerView.Adapter<BookItemListAdapte
 
             title = (TextView)view.findViewById(R.id.book_item_title);
             smallThumbnail = (ImageView) view.findViewById(R.id.book_item_small_thumbnail);
+        }
+
+        public ImageView getSmallThumbnail() {
+            return smallThumbnail;
+        }
+
+        public TextView getTitle() {
+            return title;
         }
     }
 

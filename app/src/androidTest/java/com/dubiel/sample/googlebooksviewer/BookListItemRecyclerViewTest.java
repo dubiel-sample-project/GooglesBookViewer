@@ -25,8 +25,11 @@ import org.junit.runner.RunWith;
 import static android.support.test.InstrumentationRegistry.getTargetContext;
 import static android.support.test.espresso.Espresso.onView;
 import static android.support.test.espresso.action.ViewActions.click;
+import static android.support.test.espresso.assertion.ViewAssertions.matches;
 import static android.support.test.espresso.intent.Intents.intended;
 import static android.support.test.espresso.intent.matcher.IntentMatchers.hasComponent;
+import static android.support.test.espresso.matcher.ViewMatchers.isDisplayed;
+import static android.support.test.espresso.matcher.ViewMatchers.withText;
 
 
 @RunWith(AndroidJUnit4.class)
@@ -39,19 +42,39 @@ public class BookListItemRecyclerViewTest {
     public ActivityTestRule<MainActivity> activityRule = new ActivityTestRule<>(
             MainActivity.class);
 
+    @Rule
+    public ActivityTestRule<BookDetailActivity> bookDetailActivityRule = new ActivityTestRule<>(
+            BookDetailActivity.class);
+
     @Test
-    public void scrollToItemPosition_checkBookDetailActivityIntent() {
+        public void scrollToItemPosition_checkBookDetailActivityIntent() {
         onView(ViewMatchers.withId(R.id.book_item_list_recycler_view))
                 .perform(RecyclerViewActions.actionOnItemAtPosition(ITEM_POSITION, click()));
-
-        SystemClock.sleep(2000);
+        SystemClock.sleep(5000);
         intended(hasComponent(new ComponentName(getTargetContext(), BookDetailActivity.class)));
-//
-//        // Match the text in an item below the fold and check that it's displayed.
-//        String itemElementText = mActivityRule.getActivity().getResources().getString(
-//                R.string.item_element_text) + String.valueOf(ITEM_BELOW_THE_FOLD);
-//        onView(withText(itemElementText)).check(matches(isDisplayed()));
+
     }
+
+    @Test
+    public void scrollToItemPosition_checkBookDetailActivityText() {
+        onView(ViewMatchers.withId(R.id.book_item_list_recycler_view))
+                .perform(RecyclerViewActions.actionOnItemAtPosition(ITEM_POSITION, click()));
+        SystemClock.sleep(5000);
+
+//        String itemElementText = activityRule.getActivity().getResources().getString(
+//            R.string.) + String.valueOf(ITEM_BELOW_THE_FOLD);
+//        String itemElementText = bookDetailActivityRule.getActivity().getResources().getString(
+//                R.string.) + String.valueOf(ITEM_BELOW_THE_FOLD);
+//        onView(ViewMatchers.withId(R.id.book_detail_item_title).).check(matches(isDisplayed()));
+    }
+
+//    @Test
+//    public void scrollToItemPosition_checkBookDetailActivityBundleArgument() {
+//        onView(ViewMatchers.withId(R.id.book_item_list_recycler_view))
+//                .perform(RecyclerViewActions.actionOnItemAtPosition(ITEM_POSITION, click()));
+//        SystemClock.sleep(5000);
+//        intended(hasComponent(new ComponentName(getTargetContext(), BookDetailActivity.class)));
+//    }
 
 //    @Test
 //    public void itemInMiddleOfList_hasSpecialText() {
@@ -65,17 +88,17 @@ public class BookListItemRecyclerViewTest {
 ////        onView(withText(middleElementText)).check(matches(isDisplayed()));
 //    }
 
-    private static Matcher<BookItemListAdapter.ViewHolder> isInTheMiddle() {
-        return new TypeSafeMatcher<BookItemListAdapter.ViewHolder>() {
-            @Override
-            protected boolean matchesSafely(BookItemListAdapter.ViewHolder customHolder) {
-                return false;
-            }
-
-            @Override
-            public void describeTo(Description description) {
-                description.appendText("item in the middle");
-            }
-        };
-    }
+//    private static Matcher<BookItemListAdapter.ViewHolder> isInTheMiddle() {
+//        return new TypeSafeMatcher<BookItemListAdapter.ViewHolder>() {
+//            @Override
+//            protected boolean matchesSafely(BookItemListAdapter.ViewHolder bookItemListAdapterHolder) {
+////                return bookItemListAdapterHolder.getTitle().getText();
+//            }
+//
+//            @Override
+//            public void describeTo(Description description) {
+//                description.appendText("item in the middle");
+//            }
+//        };
+//    }
 }
