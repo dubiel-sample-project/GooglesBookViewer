@@ -45,16 +45,12 @@ public class BookItemListAdapter extends RecyclerView.Adapter<BookItemListAdapte
 
     @Override
     public void onBindViewHolder(final BookItemListAdapter.ViewHolder viewHolder, int i) {
-//        System.out.println("onBindViewHolder: " + i);
-
         int key = (int)Math.floor(i / SearchManager.MAX_RESULTS);
-//        System.out.println("key: " + key);
 
         try {
             BookListItems currentBookListItems = bookListItems.getIfPresent(key);
 
             int bookListItemIndex = i % SearchManager.MAX_RESULTS;
-//            System.out.println("bookListItemIndex: " + bookListItemIndex);
 
             if(bookListItemIndex >= currentBookListItems.getItems().length) {
                 return;
@@ -92,22 +88,7 @@ public class BookItemListAdapter extends RecyclerView.Adapter<BookItemListAdapte
         if(bookListItems.size() == 0) {
             return 0;
         }
-//        System.out.println("itemCount: " + itemCount);
-
         return itemCount;
-
-//        long itemCount = (bookListItems.size() + 1) * SearchManager.MAX_RESULTS;
-//        System.out.println("itemCount: " + itemCount);
-//        System.out.println("getifpresent: " + (bookListItems.getIfPresent(bookListItems.size() - 1) instanceof BookListItems));
-//
-//        return (int)itemCount;
-
-//        long itemCount = (bookListItems.size() - 1) * SearchManager.MAX_RESULTS;
-//        if(bookListItems.getIfPresent(bookListItems.size() - 1) instanceof BookListItems) {
-//            itemCount += bookListItems.getIfPresent(bookListItems.size() - 1).getItems().length;
-//        }
-//        System.out.println("itemCount: " + itemCount);
-//        return (int)itemCount;
     }
 
     public void setItemCount(int itemCount) {

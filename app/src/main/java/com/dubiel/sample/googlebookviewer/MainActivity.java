@@ -360,9 +360,10 @@ public class MainActivity extends AppCompatActivity
 //        System.out.println("updateBookItemListAdapterItemCount, getifpresent: " + (bookListItemsCache.getIfPresent(maxKey) instanceof BookListItems));
 
         int itemCount = maxKey * SearchManager.MAX_RESULTS;
-        if(bookListItemsCache.getIfPresent(maxKey) instanceof BookListItems) {
+        BookListItems bookListItems = bookListItemsCache.getIfPresent(maxKey);
+        if(bookListItems instanceof BookListItems) {
 //            System.out.println("updateBookItemListAdapterItemCount, length: " + bookListItemsCache.getIfPresent(maxKey).getItems().length);
-            itemCount += bookListItemsCache.getIfPresent(maxKey).getItems().length;
+            itemCount += bookListItems.getItems().length;
         }
 //        System.out.println("updateBookItemListAdapterItemCount, itemCount: " + itemCount);
 

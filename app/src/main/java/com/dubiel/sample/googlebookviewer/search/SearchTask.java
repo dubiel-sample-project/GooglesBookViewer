@@ -21,8 +21,6 @@ public class SearchTask implements Callable<BookListItems>
         this.context = context;
         this.startIndex = startIndex;
         this.url = url;
-
-//        System.out.println("SearchTask, url: " + url);
     }
 
     public BookListItems call() {
