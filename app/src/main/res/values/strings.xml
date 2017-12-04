@@ -1,5 +1,5 @@
 <resources>
-    <string name="app_name">Google Book Viewer</string>
+    <string name="app_name">GBook Viewer</string>
     <string name="navigation_drawer_open">Open navigation drawer</string>
     <string name="navigation_drawer_close">Close navigation drawer</string>
     <string name="action_settings">Settings</string>
@@ -8,6 +8,7 @@
     <string name="search_hint">Hint</string>
     <string name="popular_searches">Popular Searches</string>
     <string name="no_description_available">No Description available</string>
+    <string name="google_books_api_key">AIzaSyBaTPJ5YXt5V6VSuvnxhIgj4NJZ1vJqtmM</string>
     <string-array name="category_array">
         <item>cats</item>
         <item>nature</item>

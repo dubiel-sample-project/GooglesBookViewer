@@ -14,21 +14,13 @@ import android.support.test.filters.LargeTest;
 import android.support.test.rule.ActivityTestRule;
 import android.support.test.runner.AndroidJUnit4;
 import android.view.Gravity;
-import android.view.KeyEvent;
-import android.widget.EditText;
 
 import com.dubiel.sample.googlebookviewer.MainActivity;
 import com.dubiel.sample.googlebookviewer.R;
 
 import static android.support.test.espresso.action.ViewActions.click;
-import static android.support.test.espresso.action.ViewActions.closeSoftKeyboard;
-import static android.support.test.espresso.action.ViewActions.pressKey;
-import static android.support.test.espresso.action.ViewActions.swipeRight;
-import static android.support.test.espresso.action.ViewActions.typeText;
 import static android.support.test.espresso.contrib.DrawerMatchers.isClosed;
-import static android.support.test.espresso.matcher.ViewMatchers.assertThat;
 import static android.support.test.espresso.matcher.ViewMatchers.hasDescendant;
-import static android.support.test.espresso.matcher.ViewMatchers.isAssignableFrom;
 import static android.support.test.espresso.matcher.ViewMatchers.withText;
 import static android.support.test.espresso.matcher.ViewMatchers.withId;
 import static android.support.test.espresso.Espresso.onView;

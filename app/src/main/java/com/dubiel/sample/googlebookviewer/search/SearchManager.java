@@ -6,6 +6,7 @@ import android.os.Handler;
 import android.os.Message;
 
 import com.dubiel.sample.googlebookviewer.MainActivity;
+import com.dubiel.sample.googlebookviewer.R;
 import com.dubiel.sample.googlebookviewer.search.searchitem.BookListItems;
 import com.google.common.util.concurrent.Futures;
 import com.google.common.util.concurrent.ListenableFuture;
@@ -29,10 +30,10 @@ public class SearchManager {
     static final private String TAG = "searchmanager";
     static final private int NUM_THREADS = 10;
     static final private String SEARCH_URL =
-            "https://www.googleapis.com/books/v1/volumes?q=%s&fields=items(id,selfLink,volumeInfo/title,volumeInfo/imageLinks/smallThumbnail)&startIndex=%d&maxResults=" + SearchManager.MAX_RESULTS;
+            "https://www.googleapis.com/books/v1/volumes?key=%s&q=%s&fields=items(id,selfLink,volumeInfo/title,volumeInfo/imageLinks/smallThumbnail)&startIndex=%d&maxResults=" + SearchManager.MAX_RESULTS;
 
-    public static String createUrl(String term, int startIndex) {
-        return String.format(SearchManager.SEARCH_URL, term, startIndex * SearchManager.MAX_RESULTS);
+    public static String createUrl(String key, String term, int startIndex) {
+        return String.format(SearchManager.SEARCH_URL, key, term, startIndex * SearchManager.MAX_RESULTS);
     }
 
     private enum STATUS {
@@ -108,7 +109,8 @@ public class SearchManager {
 
     public SearchTask getSearchTask(String term, int startIndex)
     {
-        return new SearchTask(getContext(), createUrl(term, startIndex), startIndex);
+        String key = getContext().getResources().getString(R.string.google_books_api_key);
+        return new SearchTask(getContext(), createUrl(key, term, startIndex), startIndex);
     }
 
 }

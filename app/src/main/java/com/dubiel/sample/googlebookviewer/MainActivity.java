@@ -105,6 +105,10 @@ public class MainActivity extends AppCompatActivity
                 return;
             }
 
+            if(result.getItems() == null) {
+                return;
+            }
+
             if(result.getItems().length == 0) {
                 return;
             }
@@ -185,25 +189,19 @@ public class MainActivity extends AppCompatActivity
             public void onScrolled(RecyclerView recyclerView, int dx, int dy) {
                 super.onScrolled(recyclerView, dx, dy);
 
-                LinearLayoutManager layoutManager = (LinearLayoutManager) recyclerView.getLayoutManager();
-//                int totalItem = layoutManager.getItemCount();
-                int firstVisibleItemPosition = layoutManager.findFirstVisibleItemPosition();
-                int lastVisibleItem = layoutManager.findLastVisibleItemPosition();
-
-//                System.out.println("dx: " + dx);
-//                System.out.println("dy: " + dy);
-//                System.out.println("firstVisibleItemPosition: " + firstVisibleItemPosition);
-
                 if (!cacheLoading) {
+                    LinearLayoutManager layoutManager = (LinearLayoutManager) recyclerView.getLayoutManager();
                     if (dy < 0) {
+                        int firstVisibleItemPosition = layoutManager.findFirstVisibleItemPosition();
                         int cacheKey = (int)Math.floor((firstVisibleItemPosition - 1) / SearchManager.MAX_RESULTS);
                         if(!(bookListItemsCache.getIfPresent(cacheKey) instanceof BookListItems)) {
                             updateCache(firstVisibleItemPosition - 1);
                         }
                     } else if (dy > 0) {
-                        int cacheKey = (int)Math.floor((lastVisibleItem + 1) / SearchManager.MAX_RESULTS);
+                        int lastVisibleItemPosition = layoutManager.findLastVisibleItemPosition();
+                        int cacheKey = (int)Math.floor((lastVisibleItemPosition + 1) / SearchManager.MAX_RESULTS);
                         if(!(bookListItemsCache.getIfPresent(cacheKey) instanceof BookListItems)) {
-                            updateCache(lastVisibleItem + 1);
+                            updateCache(lastVisibleItemPosition + 1);
                         }
                     }
                 }
@@ -325,11 +323,6 @@ public class MainActivity extends AppCompatActivity
         cacheLoading = true;
         int cacheKey = (int)Math.floor(key / SearchManager.MAX_RESULTS);
 
-//        System.out.println("key: " + key);
-//        System.out.println("cacheKey: " + cacheKey);
-//        System.out.println("cache.size: " + bookListItemsCache.size());
-
-//        BookListItems bookListItems = bookListItemsCache.getIfPresent(cacheKey);
         if(bookListItemsCache.getIfPresent(cacheKey) instanceof BookListItems) {
             cacheLoading = false;
             spinner.setVisibility(View.GONE);
@@ -337,9 +330,6 @@ public class MainActivity extends AppCompatActivity
         }
 
         spinner.setVisibility(View.VISIBLE);
-
-//        String url = SearchManager.createUrl(currentSearchTerm, key);
-//        System.out.println("updateCache, url: " + url);
 
         List<SearchTask> tasks = new ArrayList<>();
         tasks.add(searchManager.getSearchTask(currentSearchTerm, cacheKey));
@@ -355,17 +345,11 @@ public class MainActivity extends AppCompatActivity
         }
 
         int maxKey = Collections.max(bookListItemsCache.asMap().keySet());
-
-//        System.out.println("updateBookItemListAdapterItemCount, maxKey: " + maxKey);
-//        System.out.println("updateBookItemListAdapterItemCount, getifpresent: " + (bookListItemsCache.getIfPresent(maxKey) instanceof BookListItems));
-
         int itemCount = maxKey * SearchManager.MAX_RESULTS;
         BookListItems bookListItems = bookListItemsCache.getIfPresent(maxKey);
         if(bookListItems instanceof BookListItems) {
-//            System.out.println("updateBookItemListAdapterItemCount, length: " + bookListItemsCache.getIfPresent(maxKey).getItems().length);
             itemCount += bookListItems.getItems().length;
         }
-//        System.out.println("updateBookItemListAdapterItemCount, itemCount: " + itemCount);
 
         bookItemListAdapter.setItemCount(itemCount);
     }

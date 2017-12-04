@@ -110,14 +110,6 @@ public class BookItemListAdapter extends RecyclerView.Adapter<BookItemListAdapte
             title = (TextView)view.findViewById(R.id.book_item_title);
             smallThumbnail = (ImageView) view.findViewById(R.id.book_item_small_thumbnail);
         }
-
-        public ImageView getSmallThumbnail() {
-            return smallThumbnail;
-        }
-
-        public TextView getTitle() {
-            return title;
-        }
     }
 
 }
