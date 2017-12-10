@@ -86,7 +86,7 @@ public class SearchManager {
                 }
 
                 try {
-                    latch.await(5, TimeUnit.SECONDS);
+                    latch.await(10, TimeUnit.SECONDS);
 
                     Bundle data = new Bundle();
                     data.putBoolean("resetscroll", resetScrollPosition);
